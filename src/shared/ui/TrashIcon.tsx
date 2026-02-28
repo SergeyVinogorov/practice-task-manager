@@ -1,8 +1,10 @@
-import type { FC } from 'react';
+import { type FC, memo } from 'react';
 interface Props {
   className?: string;
 }
-export const TrashIcon: FC<Props> = ({ className }) => {
+export const TrashIcon: FC<Props> = memo(function TrashIcon({
+  className,
+}: Props) {
   return (
     <svg
       viewBox="0 0 20 20"
@@ -19,4 +21,4 @@ export const TrashIcon: FC<Props> = ({ className }) => {
       />
     </svg>
   );
-};
+});
