@@ -1,73 +1,78 @@
-# React + TypeScript + Vite
+# Practice Task Manager (React + TypeScript + FSD + Tailwind)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Mini project for practicing **React application architecture** using **Feature-Sliced Design (FSD)**.
 
-Currently, two official plugins are available:
+The app renders a small **task manager** with:
+- tasks list
+- status filtering: **All / Completed / Incomplete**
+- task deletion (no reload)
+- basic navigation (**Home**, **Tasks**)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## Tech stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **React 19**
+- **TypeScript**
+- **Vite 7**
+- **React Router 7**
+- **Tailwind CSS v4** (via `@tailwindcss/vite`)
+- **ESLint** (with `eslint-plugin-boundaries` to enforce FSD layer imports)
+- **Prettier** + `prettier-plugin-tailwindcss` (keeps Tailwind class order consistent)
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Requirements
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- **Node.js 20.19+ or 22.12+** (Vite 7 requirement).  
+  See the Vite 7 release notes / migration guide.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Getting started
+
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Optimization tasks
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 1. `React.memo` для `TaskCard` / `TrashIcon`
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+`TaskCard` / `TrashIcon` обернут в `React.memo`
+
+- Если `TaskCard` / `TrashIcon` получает те же пропсы с предыдущего рендера Реакт может пропустить ререндер компонента
+- Это полезно тогда когда родительский компонент перередерился но карточка задачи не перрендерилась (видно в примере скриншотов профайлера)
+
+
+
+### 2. `useMemo` для отфильтрнованных задач
+
+- Пересчитывает данные при изменении `allTasks`
+- Пересчитывает данные при изменении `filter`
+- Не возвращает устаревшие данные после удаления задачи
+
+
+### 3. `useCallback` для `removeTask`
+
+`removeTask` обернут в `useCallback`.
+
+- ссылка на функцию остается стабильной
+- дочерние компоненты могут получать одну и ту же ссылку на обратный вызов вместо новой каждый раз
+
+
+## React DevTools Profiler analysis
+
+```text
+docs/profiler/
 ```
+
+### Screenshots before and after
+
+#### Filter
+1. ![Profiler before optimization filter](docs/profiler/filter-before-opt.png)
+2. ![Profiler after optimization 2](docs/profiler/filter-after-opt.png)
+#### Delete
+3. ![Profiler before optimization delete](docs/profiler/delete-befor-opt.png)
+4. ![Profiler after optimization delete](docs/profiler/delete-after-opt.png)
