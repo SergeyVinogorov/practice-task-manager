@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import { type FC, memo } from 'react';
 import clsx from 'clsx';
 import { CheckIcon } from 'entities/task/ui/CheckIcon';
 
@@ -19,7 +19,10 @@ interface Props {
   isComplete: boolean;
 }
 
-export const TaskCard: FC<Props> = ({ title, isComplete }) => {
+export const TaskCard: FC<Props> = memo(function TaskCard({
+  title,
+  isComplete,
+}: Props) {
   return (
     <div
       className={clsx(
@@ -42,4 +45,4 @@ export const TaskCard: FC<Props> = ({ title, isComplete }) => {
       </div>
     </div>
   );
-};
+});
