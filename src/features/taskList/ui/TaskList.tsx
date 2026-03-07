@@ -5,7 +5,7 @@ import { TrashIcon } from 'shared/ui/TrashIcon';
 
 interface Props {
   tasks: Task[];
-  removeAction: (id: string) => void;
+  removeAction: (id: number) => void;
 }
 
 export const TaskList: FC<Props> = ({ tasks, removeAction }) => {
@@ -13,7 +13,7 @@ export const TaskList: FC<Props> = ({ tasks, removeAction }) => {
     <ul className="space-y-2">
       {tasks.map((task) => (
         <li key={task.id} className="flex items-center gap-2">
-          <TaskCard title={task.title} isComplete={task.completed} />
+          <TaskCard title={task.todo} isComplete={task.completed} />
           <ActionButton
             variant="button"
             tone="danger"
