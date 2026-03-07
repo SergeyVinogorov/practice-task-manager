@@ -1,38 +1,42 @@
-import type { Task } from 'entities/task/model/types';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useGetTasksQuery } from 'entities/task';
+import {
+  type Filter,
+  setFilter as setFilterAction,
+  deleteTaskLocally,
+} from './taskListSlice.ts';
+import { selectFilter, selectVisibleTasks } from './selectors';
 
-export type Filter = 'all' | 'completed' | 'incomplete';
-
-type UseTasks = (initial: Task[]) => {
-  tasks: Task[];
+type UseTasks = () => {
+  tasks: ReturnType<typeof selectVisibleTasks>;
   filter: Filter;
   setFilter: (f: Filter) => void;
-  removeTask: (id: string) => void;
+  removeTask: (id: number) => void;
+  isLoading: boolean;
+  isError: boolean;
+  error: unknown;
 };
 
-export const useTasks: UseTasks = (initial: Task[]) => {
-  const [allTasks, setAllTasks] = useState<Task[]>(initial);
-  const [filter, setFilter] = useState<Filter>('all');
+export const useTasks: UseTasks = () => {
+  const { isLoading, isError, error } = useGetTasksQuery();
+  const tasks = useSelector(selectVisibleTasks);
+  const filter = useSelector(selectFilter);
+  const dispatch = useDispatch();
 
-  const tasks = useMemo(() => {
-    switch (filter) {
-      case 'completed':
-        return allTasks.filter((t) => t.completed);
-      case 'incomplete':
-        return allTasks.filter((t) => !t.completed);
-      default:
-        return allTasks;
-    }
-  }, [allTasks, filter]);
+  const setFilter = useCallback(
+    (f: Filter) => {
+      dispatch(setFilterAction(f));
+    },
+    [dispatch]
+  );
 
-  const onRemoveTask = useCallback((id: string) => {
-    setAllTasks((prev) => prev.filter((task) => task.id !== id));
-  }, []);
+  const removeTask = useCallback(
+    (id: number) => {
+      dispatch(deleteTaskLocally(id));
+    },
+    [dispatch]
+  );
 
-  return {
-    tasks,
-    filter,
-    setFilter,
-    removeTask: onRemoveTask,
-  };
+  return { tasks, filter, setFilter, removeTask, isLoading, isError, error };
 };
